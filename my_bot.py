@@ -42,7 +42,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def main():
     app = Application.builder().token(TELEGRAM_TOKEN).build()
-    # Инициализация приложения (вот что было пропущено!)
+    # Инициализация приложения
     await app.initialize()
     
     app.add_handler(CommandHandler("start", start))
@@ -73,46 +73,6 @@ async def main():
     await site.start()
     print(f"Сервер запущен на порту {PORT}...")
 
-    await asyncio.Event().wait()
-
-if __name__ == "__main__":
-    asyncio.run(main())    answer = await generate_answer(user_text)
-    await update.message.reply_text(answer)
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Я могу ответить на вопросы по электрике. Просто опишите проблему.")
-
-async def main():
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
-    PORT = int(os.environ.get("PORT", 10000))
-    WEBHOOK_URL = "https://" + os.environ.get("RENDER_EXTERNAL_HOSTNAME", "") + "/webhook"
-
-    if WEBHOOK_URL != "/webhook":
-        await app.bot.set_webhook(WEBHOOK_URL)
-        print(f"Webhook set to {WEBHOOK_URL}")
-    else:
-        print("!!! RENDER_EXTERNAL_HOSTNAME not set, cannot set webhook !!!")
-
-    async def webhook(request):
-        if request.method == "POST":
-            data = await request.json()
-            await app.process_update(Update.de_json(data, app.bot))
-            return web.Response()
-        return web.Response(text="OK")
-
-    app_webhook = web.Application()
-    app_webhook.router.add_post("/webhook", webhook)
-    runner = web.AppRunner(app_webhook)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", PORT)
-    await site.start()
-    print(f"Сервер запущен на порту {PORT}...")
-
-    # Держим приложение живым
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
